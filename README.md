@@ -1,8 +1,19 @@
 # stprobe
 
-`stprobe` is a minimal Rust CLI for inspecting the header and tensor metadata inside a `.safetensors` file.
+`stprobe` is a small Rust CLI that works like `ffprobe` for `.safetensors` files.
 
-It prints a stable plain-text summary for a single `.safetensors` file, similar in spirit to `ffprobe`.
+Point it at a model file and it prints a stable plain-text summary:
+
+- file path
+- file size
+- tensor count
+- metadata
+- per-tensor name, dtype, shape, parameter count, and byte size
+- total parameters
+- total tensor bytes
+- dtype breakdown
+
+It reads the safetensors header and metadata only. It does not load tensor payloads into memory.
 
 ## Install
 
@@ -10,31 +21,19 @@ It prints a stable plain-text summary for a single `.safetensors` file, similar 
 cargo install stprobe
 ```
 
-## Build From Source
+## Quick Start
 
 ```bash
-cargo install --path .
-```
-
-## Run
-
-```bash
-cargo run -- model.safetensors
 stprobe model.safetensors
 ```
 
-## What It Shows
+Example input:
 
-- file path
-- file size
-- tensor count
-- metadata
-- each tensor's name, dtype, shape, parameter count, and byte size
-- total parameters
-- total tensor bytes
-- dtype breakdown
+```text
+$ stprobe model.safetensors
+```
 
-## Example Output
+Example output:
 
 ```text
 File: model.safetensors
@@ -56,4 +55,32 @@ Tensors:
     shape: [1, 512]
     numel: 512
     bytes: 4096
+
+  embeddings.word_embeddings.weight
+    dtype: F32
+    shape: [30522, 384]
+    numel: 11720448
+    bytes: 46881792
+```
+
+## Why Not A One-Off Script
+
+You can inspect a safetensors file with a short Rust or Python script, but `stprobe` is better when you want something reusable:
+
+- stable output you can read, diff, grep, and paste into issues
+- one command instead of re-editing ad hoc scripts
+- no Python environment or notebook setup
+- uses the official `safetensors` crate instead of custom header parsing
+- avoids loading full tensor data when you only need structure and counts
+
+## Build From Source
+
+```bash
+cargo install --path .
+```
+
+Or run it without installing:
+
+```bash
+cargo run -- model.safetensors
 ```
