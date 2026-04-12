@@ -2,8 +2,15 @@
 name = "stprobe"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.75"
 description = "A minimal CLI for inspecting safetensors headers"
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/Xyc2016/stprobe"
+homepage = "https://github.com/Xyc2016/stprobe"
+documentation = "https://docs.rs/stprobe"
+keywords = ["safetensors", "cli", "tensor", "inspect"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }

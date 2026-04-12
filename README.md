@@ -2,7 +2,15 @@
 
 `stprobe` is a minimal Rust CLI for inspecting the header and tensor metadata inside a `.safetensors` file.
 
+It prints a stable plain-text summary for a single `.safetensors` file, similar in spirit to `ffprobe`.
+
 ## Install
+
+```bash
+cargo install stprobe
+```
+
+## Build From Source
 
 ```bash
 cargo install --path .
@@ -14,6 +22,17 @@ cargo install --path .
 cargo run -- model.safetensors
 stprobe model.safetensors
 ```
+
+## What It Shows
+
+- file path
+- file size
+- tensor count
+- metadata
+- each tensor's name, dtype, shape, parameter count, and byte size
+- total parameters
+- total tensor bytes
+- dtype breakdown
 
 ## Example Output
 
