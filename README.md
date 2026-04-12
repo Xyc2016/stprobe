@@ -8,6 +8,10 @@ It is a small Rust CLI for answering:
 
 Point it at a model file and it prints a stable plain-text summary without loading tensor payloads into memory.
 
+It works with local files and `http(s)` URLs, including Hugging Face `resolve` links.
+
+Because it only probes the safetensors header and metadata, it is fast even for very large remote files.
+
 `stprobe` shows:
 
 - file path
@@ -25,6 +29,7 @@ It is built for model inspection, debugging, issue reports, and quick shell use.
 - no notebook setup
 - no ad hoc parsing script
 - header-only inspection with the official `safetensors` crate
+- remote probing over HTTP range requests instead of downloading the full file
 - stable plain-text output that is easy to read, diff, grep, and paste
 
 ## Install
@@ -36,14 +41,14 @@ cargo install stprobe
 ## Quick Start
 
 ```bash
-stprobe model.safetensors
+stprobe all-MiniLM-L6-v2.safetensors
 ```
 
 Example:
 
 ```text
-$ stprobe model.safetensors
-File: model.safetensors
+$ stprobe all-MiniLM-L6-v2.safetensors
+File: all-MiniLM-L6-v2.safetensors
 Size: 90868376 bytes
 Tensors: 104
 Parameters: 22713728
@@ -70,62 +75,56 @@ Tensors:
     bytes: 46881792
 ```
 
-## Try It On A Real Model
+## Fast On Huge Remote Files
 
-Download a public `.safetensors` file from Hugging Face:
-
-```bash
-wget https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/model.safetensors -O all-MiniLM-L6-v2.safetensors
-```
-
-Inspect it:
+You can also probe a large Hugging Face model directly over HTTP without downloading the full `.safetensors` file first:
 
 ```bash
-stprobe all-MiniLM-L6-v2.safetensors
-```
-
-To get a feel for how quickly header-only inspection runs, time it:
-
-```bash
-time stprobe all-MiniLM-L6-v2.safetensors
+time stprobe https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors
 ```
 
 Example:
 
 ```text
-$ time stprobe all-MiniLM-L6-v2.safetensors
-File: all-MiniLM-L6-v2.safetensors
-Size: 90868376 bytes
-Tensors: 104
-Parameters: 22713728
-Tensor-Bytes: 90856960
+$ time stprobe https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors
+File: https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors
+Size: 17246524772 bytes
+Tensors: 1442
+Parameters: 16871188965
+Tensor-Bytes: 17246298324
 
 Metadata:
-  format = pt
+  modelspec.architecture = Flux.1-dev
+  modelspec.author = Black Forest Labs
+  modelspec.date = 2024-08-01
+  modelspec.description = A guidance distilled rectified flow model.
+  modelspec.license = FLUX.1 [dev] Non-Commercial License
+  modelspec.title = Flux.1-dev
 
 DType Breakdown:
-  F32: 90852864 bytes
-  I64: 4096 bytes
+  F16: 247300608 bytes
+  F32: 335278740 bytes
+  F8_E4M3: 16663718976 bytes
 
 Tensors:
-  embeddings.position_ids
-    dtype: I64
-    shape: [1, 512]
-    numel: 512
-    bytes: 4096
+  text_encoders.clip_l.logit_scale
+    dtype: F32
+    shape: []
+    numel: 1
+    bytes: 4
 
   ...
 
-  pooler.dense.weight
-    dtype: F32
-    shape: [384, 384]
-    numel: 147456
-    bytes: 589824
+  text_encoders.t5xxl.transformer.shared.weight
+    dtype: F8_E4M3
+    shape: [32128, 4096]
+    numel: 131596288
+    bytes: 131596288
 
-stprobe all-MiniLM-L6-v2.safetensors  0.00s user 0.00s system 87% cpu 0.004 total
+stprobe https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors  0.01s user 0.02s system 2% cpu 1.277 total
 ```
 
-Example timing from one local machine. Exact results vary with filesystem cache, shell, and hardware.
+Example timing from one local machine using the optimized build. Exact results vary with network, filesystem cache, shell, and hardware.
 
 ## Why Not A One-Off Script
 
