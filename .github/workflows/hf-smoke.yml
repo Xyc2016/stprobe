@@ -1,0 +1,27 @@
+name: Hugging Face Smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * 1"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HF_URL: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/model.safetensors
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Probe a fixed Hugging Face model
+        shell: bash
+        run: |
+          cargo run --locked --release -- "$HF_URL" > output.txt
+          grep -F "File: $HF_URL" output.txt
+          grep -F "Tensors: 104" output.txt
+          grep -F "Parameters: 22713728" output.txt
+          grep -F "Metadata:" output.txt
+          grep -F "embeddings.word_embeddings.weight" output.txt
