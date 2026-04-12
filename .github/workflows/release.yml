@@ -19,14 +19,14 @@ jobs:
           - os: macos-15-intel
             target: x86_64-apple-darwin
             archive: tar.gz
-          - os: macos-14
+          - os: macos-15
             target: aarch64-apple-darwin
             archive: tar.gz
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             archive: zip
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build release binary
@@ -49,7 +49,7 @@ jobs:
           Compress-Archive -Path "dist/stprobe.exe" -DestinationPath "stprobe-${{ matrix.target }}.zip" -Force
 
       - name: Upload packaged binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-${{ matrix.target }}
           path: stprobe-${{ matrix.target }}.${{ matrix.archive }}
@@ -62,7 +62,7 @@ jobs:
       contents: write
     steps:
       - name: Download packaged binaries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: release-*
           path: dist
