@@ -1,8 +1,14 @@
 # stprobe
 
-`stprobe` is a small Rust CLI that works like `ffprobe` for `.safetensors` files.
+`stprobe` is `ffprobe` for `.safetensors`.
 
-Point it at a model file and it prints a stable plain-text summary:
+It is a small Rust CLI for answering:
+
+> "What is inside this safetensors file?"
+
+Point it at a model file and it prints a stable plain-text summary without loading tensor payloads into memory.
+
+`stprobe` shows:
 
 - file path
 - file size
@@ -13,7 +19,13 @@ Point it at a model file and it prints a stable plain-text summary:
 - total tensor bytes
 - dtype breakdown
 
-It reads the safetensors header and metadata only. It does not load tensor payloads into memory.
+It is built for model inspection, debugging, issue reports, and quick shell use.
+
+- no Python environment
+- no notebook setup
+- no ad hoc parsing script
+- header-only inspection with the official `safetensors` crate
+- stable plain-text output that is easy to read, diff, grep, and paste
 
 ## Install
 
@@ -27,15 +39,10 @@ cargo install stprobe
 stprobe model.safetensors
 ```
 
-Example input:
+Example:
 
 ```text
 $ stprobe model.safetensors
-```
-
-Example output:
-
-```text
 File: model.safetensors
 Size: 90868376 bytes
 Tensors: 104
@@ -63,15 +70,72 @@ Tensors:
     bytes: 46881792
 ```
 
+## Try It On A Real Model
+
+Download a public `.safetensors` file from Hugging Face:
+
+```bash
+wget https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/model.safetensors -O all-MiniLM-L6-v2.safetensors
+```
+
+Inspect it:
+
+```bash
+stprobe all-MiniLM-L6-v2.safetensors
+```
+
+To get a feel for how quickly header-only inspection runs, time it:
+
+```bash
+time stprobe all-MiniLM-L6-v2.safetensors
+```
+
+Example:
+
+```text
+$ time stprobe all-MiniLM-L6-v2.safetensors
+File: all-MiniLM-L6-v2.safetensors
+Size: 90868376 bytes
+Tensors: 104
+Parameters: 22713728
+Tensor-Bytes: 90856960
+
+Metadata:
+  format = pt
+
+DType Breakdown:
+  F32: 90852864 bytes
+  I64: 4096 bytes
+
+Tensors:
+  embeddings.position_ids
+    dtype: I64
+    shape: [1, 512]
+    numel: 512
+    bytes: 4096
+
+  ...
+
+  pooler.dense.weight
+    dtype: F32
+    shape: [384, 384]
+    numel: 147456
+    bytes: 589824
+
+stprobe all-MiniLM-L6-v2.safetensors  0.00s user 0.00s system 87% cpu 0.004 total
+```
+
+Example timing from one local machine. Exact results vary with filesystem cache, shell, and hardware.
+
 ## Why Not A One-Off Script
 
-You can inspect a safetensors file with a short Rust or Python script, but `stprobe` is better when you want something reusable:
+You can inspect a safetensors file with a short Rust or Python script. `stprobe` is better when you want something you can keep using:
 
-- stable output you can read, diff, grep, and paste into issues
-- one command instead of re-editing ad hoc scripts
-- no Python environment or notebook setup
+- one command instead of re-editing one-off scripts
+- stable output for bug reports, CI logs, and terminal use
+- no Python packaging, no notebook, no local helper code
 - uses the official `safetensors` crate instead of custom header parsing
-- avoids loading full tensor data when you only need structure and counts
+- reads only the safetensors header and metadata when that is all you need
 
 ## Build From Source
 
