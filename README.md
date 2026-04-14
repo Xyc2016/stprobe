@@ -13,7 +13,7 @@ It works with local files and `http(s)` URLs, including Hugging Face `resolve` l
 Why `stprobe`:
 
 - fast: header-only inspection, including huge remote files over HTTP range requests
-- small: prebuilt release archives are about 2 MB and the tool is a single binary
+- small: prebuilt release archives are about 1.4 to 1.6 MB across supported platforms
 - easy: one command, no Python environment, stable plain-text output
 
 Because it only probes the safetensors header and metadata, it is fast even for very large remote files.
