@@ -69,8 +69,8 @@ jobs:
         shell: bash
         run: |
           latest=""
-          if response="$(curl -fsSL https://crates.io/api/v1/crates/stprobe 2>/dev/null)"; then
-            latest="$(printf '%s' "$response" | sed -n 's/.*"max_version":"\([^"]*\)".*/\1/p')"
+          if response="$(curl -fsSL -A 'stprobe-publish-check' https://crates.io/api/v1/crates/stprobe 2>/dev/null)"; then
+            latest="$(printf '%s' "$response" | jq -r '.crate.max_version // empty')"
           fi
 
           echo "version=$latest" >> "$GITHUB_OUTPUT"
