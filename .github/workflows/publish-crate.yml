@@ -88,7 +88,7 @@ jobs:
       - name: Authenticate with crates.io
         if: steps.published.outputs.should_publish == 'true'
         id: auth
-        uses: rust-lang/crates-io-auth-action@v1
+        uses: rust-lang/crates-io-auth-action@v1.0.4
 
       - name: Publish crate
         if: steps.published.outputs.should_publish == 'true'

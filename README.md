@@ -50,7 +50,7 @@ curl -L https://github.com/Xyc2016/stprobe/releases/latest/download/stprobe-x86_
 Or install from crates.io:
 
 ```bash
-cargo install stprobe --registry crates-io
+cargo install stprobe
 ```
 
 ## Quick Start

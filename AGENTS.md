@@ -13,6 +13,7 @@ Keep the tool small, fast, and predictable.
 - header-only inspection
 - no Python dependency
 - no tensor payload loading
+- installable from crates.io or GitHub Releases
 
 ## Current Scope
 
@@ -70,6 +71,9 @@ If a change pushes the project toward a general safetensors toolbox, stop and re
 - Do not load full tensor data just to inspect metadata.
 - For remote files, prefer HTTP range requests and header-only probing.
 - Hugging Face support should work well through standard `resolve` URLs first.
+- In user-facing docs, prefer the standard install command `cargo install stprobe`.
+- Mention `--registry crates-io` only as a workaround for users with a stale or custom Cargo mirror.
+- Keep GitHub Releases as a first-class install path for users who do not want Rust installed.
 
 ## Testing Expectations
 
@@ -107,6 +111,9 @@ Avoid cosmetic churn unless there is a clear user benefit.
 ## Release Notes
 
 Releases are built from Git tags matching `v*`.
+
+The crates.io trusted publisher is configured against `.github/workflows/publish-crate.yml`.
+If you rename or split that workflow, update the crates.io trusted publishing settings too or publishing will fail.
 
 Typical release flow:
 
