@@ -57,7 +57,7 @@ If a change pushes the project toward a general safetensors toolbox, stop and re
 - `tests/cli.rs`: CLI integration tests
 - `tests/remote_http.rs`: mock HTTP range tests
 - `tests/common/mod.rs`: small generated safetensors fixtures
-- `.github/workflows/ci.yml`: lint and test matrix
+- `.github/workflows/publish-crate.yml`: lint, test, and crates.io publish workflow
 - `.github/workflows/release.yml`: tagged multi-platform release builds
 - `.github/workflows/hf-smoke.yml`: real Hugging Face smoke test
 
