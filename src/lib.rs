@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::cmp::Ordering;
 use std::fmt::Write as _;
 use std::fs::File;
 use std::io;
@@ -429,6 +430,8 @@ fn build_report(input: &str, file_size: u64, metadata: &Metadata) -> Result<Repo
         });
     }
 
+    tensors.sort_by(|left, right| compare_tensor_names(&left.name, &right.name));
+
     let mut metadata_entries = metadata
         .metadata()
         .as_ref()
@@ -460,6 +463,114 @@ fn numel(shape: &[usize], tensor_name: &str) -> Result<u128, InspectError> {
                 tensor: tensor_name.to_owned(),
             })
     })
+}
+
+fn compare_tensor_names(left: &str, right: &str) -> Ordering {
+    let mut left_parts = left.split('.');
+    let mut right_parts = right.split('.');
+
+    loop {
+        match (left_parts.next(), right_parts.next()) {
+            (Some(left_part), Some(right_part)) => {
+                let ordering = compare_natural_str(left_part, right_part);
+                if ordering != Ordering::Equal {
+                    return ordering;
+                }
+            }
+            (Some(_), None) => return Ordering::Greater,
+            (None, Some(_)) => return Ordering::Less,
+            (None, None) => return Ordering::Equal,
+        }
+    }
+}
+
+fn compare_natural_str(left: &str, right: &str) -> Ordering {
+    let mut left_chunks = ChunkIter::new(left);
+    let mut right_chunks = ChunkIter::new(right);
+
+    loop {
+        match (left_chunks.next(), right_chunks.next()) {
+            (Some(left_chunk), Some(right_chunk)) => {
+                let ordering = match (left_chunk, right_chunk) {
+                    (Chunk::Digits(left_digits), Chunk::Digits(right_digits)) => {
+                        compare_digit_chunks(left_digits, right_digits)
+                    }
+                    (Chunk::Text(left_text), Chunk::Text(right_text)) => left_text.cmp(right_text),
+                    (Chunk::Digits(_), Chunk::Text(_)) => Ordering::Less,
+                    (Chunk::Text(_), Chunk::Digits(_)) => Ordering::Greater,
+                };
+
+                if ordering != Ordering::Equal {
+                    return ordering;
+                }
+            }
+            (Some(_), None) => return Ordering::Greater,
+            (None, Some(_)) => return Ordering::Less,
+            (None, None) => return Ordering::Equal,
+        }
+    }
+}
+
+fn compare_digit_chunks(left: &str, right: &str) -> Ordering {
+    let left_trimmed = left.trim_start_matches('0');
+    let right_trimmed = right.trim_start_matches('0');
+    let left_normalized = if left_trimmed.is_empty() { "0" } else { left_trimmed };
+    let right_normalized = if right_trimmed.is_empty() { "0" } else { right_trimmed };
+
+    left_normalized
+        .len()
+        .cmp(&right_normalized.len())
+        .then_with(|| left_normalized.cmp(right_normalized))
+        .then_with(|| left.len().cmp(&right.len()))
+}
+
+#[derive(Clone, Copy)]
+enum Chunk<'a> {
+    Digits(&'a str),
+    Text(&'a str),
+}
+
+struct ChunkIter<'a> {
+    input: &'a str,
+    index: usize,
+}
+
+impl<'a> ChunkIter<'a> {
+    fn new(input: &'a str) -> Self {
+        Self { input, index: 0 }
+    }
+}
+
+impl<'a> Iterator for ChunkIter<'a> {
+    type Item = Chunk<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index >= self.input.len() {
+            return None;
+        }
+
+        let rest = &self.input[self.index..];
+        let mut chars = rest.char_indices();
+        let (_, first) = chars.next()?;
+        let is_digit = first.is_ascii_digit();
+        let mut end = rest.len();
+
+        for (offset, ch) in chars {
+            if ch.is_ascii_digit() != is_digit {
+                end = offset;
+                break;
+            }
+        }
+
+        let chunk = &rest[..end];
+        self.index += end;
+
+        Some(if is_digit {
+            Chunk::Digits(chunk)
+        } else {
+            Chunk::Text(chunk)
+        })
+    }
 }
 
 fn format_shape(shape: &[usize]) -> String {
@@ -533,5 +644,27 @@ mod tests {
     fn formats_shapes() {
         assert_eq!(format_shape(&[2, 3, 4]), "[2, 3, 4]");
         assert_eq!(format_shape(&[]), "[]");
+    }
+
+    #[test]
+    fn sorts_tensor_names_naturally() {
+        let mut names = vec![
+            "encoder.layer.10.output.weight",
+            "encoder.layer.2.output.weight",
+            "encoder.layer.1.output.weight",
+            "encoder.layer.2.output.bias",
+        ];
+
+        names.sort_by(|left, right| compare_tensor_names(left, right));
+
+        assert_eq!(
+            names,
+            vec![
+                "encoder.layer.1.output.weight",
+                "encoder.layer.2.output.bias",
+                "encoder.layer.2.output.weight",
+                "encoder.layer.10.output.weight",
+            ]
+        );
     }
 }
