@@ -1,6 +1,6 @@
 [package]
 name = "stprobe"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 rust-version = "1.75"
 description = "A minimal CLI for inspecting safetensors headers"
@@ -25,3 +25,9 @@ predicates = "3.1"
 tempfile = "3.23"
 tokio = { version = "1.48", features = ["macros", "rt-multi-thread"] }
 wiremock = "0.6"
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+panic = "abort"
+strip = true
