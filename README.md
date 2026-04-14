@@ -34,21 +34,23 @@ It is built for model inspection, debugging, issue reports, and quick shell use.
 
 ## Install
 
-From crates.io:
+Use a prebuilt binary from GitHub Releases if you just want to run `stprobe` without installing Rust:
 
-```bash
-cargo install stprobe
-```
-
-From GitHub Releases:
-
-- Download a prebuilt binary for Linux, macOS, or Windows from:
+- Download the archive for Linux x86_64, macOS Intel, macOS Apple Silicon, or Windows x86_64 from:
   https://github.com/Xyc2016/stprobe/releases/latest
-- Or install directly on Linux x86_64:
+- Extract it and run `stprobe --version`
+
+Linux x86_64 example:
 
 ```bash
 curl -L https://github.com/Xyc2016/stprobe/releases/latest/download/stprobe-x86_64-unknown-linux-gnu.tar.gz | tar -xz
 ./stprobe --version
+```
+
+Or install from crates.io:
+
+```bash
+cargo install stprobe --registry crates-io
 ```
 
 ## Quick Start
