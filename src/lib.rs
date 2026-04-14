@@ -1,5 +1,5 @@
-use std::collections::BTreeMap;
 use std::cmp::Ordering;
+use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::fs::File;
 use std::io;
@@ -514,8 +514,16 @@ fn compare_natural_str(left: &str, right: &str) -> Ordering {
 fn compare_digit_chunks(left: &str, right: &str) -> Ordering {
     let left_trimmed = left.trim_start_matches('0');
     let right_trimmed = right.trim_start_matches('0');
-    let left_normalized = if left_trimmed.is_empty() { "0" } else { left_trimmed };
-    let right_normalized = if right_trimmed.is_empty() { "0" } else { right_trimmed };
+    let left_normalized = if left_trimmed.is_empty() {
+        "0"
+    } else {
+        left_trimmed
+    };
+    let right_normalized = if right_trimmed.is_empty() {
+        "0"
+    } else {
+        right_trimmed
+    };
 
     left_normalized
         .len()
