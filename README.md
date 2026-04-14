@@ -10,6 +10,12 @@ Point it at a model file and it prints a stable plain-text summary without loadi
 
 It works with local files and `http(s)` URLs, including Hugging Face `resolve` links.
 
+Why `stprobe`:
+
+- fast: header-only inspection, including huge remote files over HTTP range requests
+- small: prebuilt release archives are about 2 MB and the tool is a single binary
+- easy: one command, no Python environment, stable plain-text output
+
 Because it only probes the safetensors header and metadata, it is fast even for very large remote files.
 
 `stprobe` shows:
