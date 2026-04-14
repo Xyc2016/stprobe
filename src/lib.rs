@@ -168,16 +168,19 @@ enum Input<'a> {
 }
 
 fn classify_input(input: &str) -> Result<Input<'_>, InspectError> {
+    if !input.contains("://") {
+        return Ok(Input::LocalPath(Path::new(input)));
+    }
+
     match Url::parse(input) {
         Ok(url) => match url.scheme() {
             "http" | "https" => Ok(Input::HttpUrl(url)),
             scheme => Err(InspectError::UnsupportedUrlScheme(scheme.to_owned())),
         },
-        Err(_) if input.contains("://") => Err(InspectError::InvalidRemoteResponse {
+        Err(_) => Err(InspectError::InvalidRemoteResponse {
             url: input.to_owned(),
             reason: "malformed URL".to_owned(),
         }),
-        Err(_) => Ok(Input::LocalPath(Path::new(input))),
     }
 }
 
@@ -496,6 +499,16 @@ mod tests {
         match classify_input("hf://org/repo/file.safetensors").unwrap_err() {
             InspectError::UnsupportedUrlScheme(scheme) => assert_eq!(scheme, "hf"),
             other => panic!("unexpected error: {other}"),
+        }
+    }
+
+    #[test]
+    fn classifies_windows_drive_paths_as_local() {
+        match classify_input(r"C:\models\sample.safetensors").unwrap() {
+            Input::LocalPath(path) => {
+                assert_eq!(path, Path::new(r"C:\models\sample.safetensors"));
+            }
+            Input::HttpUrl(_) => panic!("expected local path"),
         }
     }
 
