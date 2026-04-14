@@ -34,8 +34,21 @@ It is built for model inspection, debugging, issue reports, and quick shell use.
 
 ## Install
 
+From crates.io:
+
 ```bash
 cargo install stprobe
+```
+
+From GitHub Releases:
+
+- Download a prebuilt binary for Linux, macOS, or Windows from:
+  https://github.com/Xyc2016/stprobe/releases/latest
+- Or install directly on Linux x86_64:
+
+```bash
+curl -L https://github.com/Xyc2016/stprobe/releases/latest/download/stprobe-x86_64-unknown-linux-gnu.tar.gz | tar -xz
+./stprobe --version
 ```
 
 ## Quick Start
