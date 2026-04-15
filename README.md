@@ -98,17 +98,18 @@ Tensors:
 
 ## Fast On Huge Remote Files
 
-You can also probe a large Hugging Face model directly over HTTP without downloading the full `.safetensors` file first:
+You can also probe a large Hugging Face model directly over HTTP without downloading the full `.safetensors` file first.
+This example pins a specific Hugging Face revision so the output stays reproducible:
 
 ```bash
-time stprobe https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors
+time stprobe https://huggingface.co/Comfy-Org/flux1-dev/resolve/0f6b956e6e2e041fb73d079b72ec0e761506f601/flux1-dev-fp8.safetensors
 ```
 
 Example:
 
 ```text
-$ time stprobe https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors
-File: https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors
+$ time stprobe https://huggingface.co/Comfy-Org/flux1-dev/resolve/0f6b956e6e2e041fb73d079b72ec0e761506f601/flux1-dev-fp8.safetensors
+File: https://huggingface.co/Comfy-Org/flux1-dev/resolve/0f6b956e6e2e041fb73d079b72ec0e761506f601/flux1-dev-fp8.safetensors
 Size: 17246524772 bytes
 Tensors: 1442
 Parameters: 16871188965
@@ -119,7 +120,11 @@ Metadata:
   modelspec.author = Black Forest Labs
   modelspec.date = 2024-08-01
   modelspec.description = A guidance distilled rectified flow model.
+  modelspec.hash_sha256 = 0x2f3c5caac0469f474439cf84eb09f900bd8e5900f4ad9404c4e05cec12314df6
+  modelspec.implementation = https://github.com/black-forest-labs/flux
   modelspec.license = FLUX.1 [dev] Non-Commercial License
+  modelspec.sai_model_spec = 1.0.1
+  modelspec.thumbnail = data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...
   modelspec.title = Flux.1-dev
 
 DType Breakdown:
@@ -142,8 +147,10 @@ Tensors:
     numel: 131596288
     bytes: 131596288
 
-stprobe https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors  0.01s user 0.02s system 2% cpu 1.277 total
+stprobe https://huggingface.co/Comfy-Org/flux1-dev/resolve/0f6b956e6e2e041fb73d079b72ec0e761506f601/flux1-dev-fp8.safetensors  0.01s user 0.02s system 2% cpu 1.277 total
 ```
+
+The `modelspec.thumbnail` value is abbreviated here for readability.
 
 Example timing from one local machine using the optimized build. Exact results vary with network, filesystem cache, shell, and hardware.
 

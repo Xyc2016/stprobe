@@ -1,3 +1,4 @@
+use std::io::{self, Write};
 use std::process::ExitCode;
 
 use clap::Parser;
@@ -19,8 +20,17 @@ fn main() -> ExitCode {
 
     match stprobe::inspect_input(&cli.file) {
         Ok(report) => {
-            print!("{}", stprobe::render_report(&report));
-            ExitCode::SUCCESS
+            let rendered = stprobe::render_report(&report);
+            let mut stdout = io::stdout().lock();
+
+            match stdout.write_all(rendered.as_bytes()) {
+                Ok(()) => ExitCode::SUCCESS,
+                Err(error) if error.kind() == io::ErrorKind::BrokenPipe => ExitCode::SUCCESS,
+                Err(error) => {
+                    eprintln!("Error: failed to write output ({error})");
+                    ExitCode::FAILURE
+                }
+            }
         }
         Err(error) => {
             eprintln!("Error: {error}");
